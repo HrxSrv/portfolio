@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --surface-2: #f2f2f2;
+  --border: #ebebeb;
+  --border-strong: #d4d4d4;
+  --fg: #171717;
+  --fg-2: #4d4d4d;
+  --fg-3: #666666;
+  --accent: #0060df;
+  --accent-hover: #004bb0;
+  --success: #1a7f37;
+  --invert-bg: #171717;
+  --invert-fg: #ffffff;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface-2: #1f1f1f;
+  --border: #262626;
+  --border-strong: #333333;
+  --fg: #ededed;
+  --fg-2: #a1a1a1;
+  --fg-3: #8f8f8f;
+  --accent: #52a8ff;
+  --accent-hover: #8cc6ff;
+  --success: #3fb950;
+  --invert-bg: #ededed;
+  --invert-fg: #0a0a0a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-success: var(--success);
+  --color-invert: var(--invert-bg);
+  --color-invert-fg: var(--invert-fg);
+  --font-sans: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
