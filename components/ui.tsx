@@ -33,7 +33,7 @@ export function Button({ href, children, variant = "primary", external }: BtnPro
   const className = `inline-flex h-11 items-center gap-2 rounded-full px-5 text-[15px] font-medium transition ${cls}`;
   if (external || href.startsWith("mailto:") || href.startsWith("http")) {
     return (
-      <a href={href} className={className} {...(href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}>
+      <a href={href} className={className} {...(external || href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}>
         {children}
       </a>
     );

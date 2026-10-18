@@ -14,8 +14,18 @@ export const site = {
   email: "harshitsrv2004@gmail.com",
   github: "https://github.com/hrxsrv",
   linkedin: "https://www.linkedin.com/in/harshitsrv/",
-  resume: "", // e.g. "/resume.pdf" — drop the PDF into /public and set the path
-  url: "https://example.com", // your deployed domain, used for metadata
+  url: "https://harshit.vithos.in", // your deployed domain, used for metadata
+};
+
+// Résumés are LaTeX files in this GitHub repo. Its "Build resumes" workflow compiles them to PDFs on the
+// pdf branch, and the manifest names the active one, which is served at /resume.pdf (see lib/resumes.ts).
+export const resumeSource = {
+  owner: "HrxSrv",
+  repo: "My-Docs",
+  branch: "main",
+  dir: "resumes", // one <id>.tex per résumé
+  manifest: "resumes.json", // { "active": "<id>" }
+  pdfBranch: "pdfs", // <id>.pdf per résumé
 };
 
 export const bio = [
@@ -35,6 +45,9 @@ export type Project = {
   categoryLabel: string;
   stack: string[];
   links: { label: string; href: string }[];
+  // Optional image cover (file in /public). "art" fills the frame as-is; "logo" sits beside the project name.
+  // Without one, the cover is drawn from the case study's architecture steps.
+  cover?: { kind: "art" | "logo"; src: string; alt: string; background: string; ink?: string };
   highlights: string[];
   caseStudy?: {
     problem: string;
@@ -55,6 +68,12 @@ export const projects: Project[] = [
     categoryLabel: "Open source",
     stack: ["Go", "Docker", "Redis", "REST APIs", "Worker pools"],
     links: [{ label: "Source on GitHub", href: "https://github.com/HrxSrv/goComp" }],
+    cover: {
+      kind: "art",
+      src: "/projects/gocomp.jpg",
+      alt: "goComp logo: the Go gopher at a laptop above AC, WA, TLE and RE verdicts",
+      background: "#020307",
+    },
     highlights: [
       "Isolated, containerized execution environments for secure multi-language evaluation.",
       "Concurrent worker pipelines and execution queues with timeout and resource-limit enforcement.",
@@ -86,12 +105,24 @@ export const projects: Project[] = [
     category: "fullstack",
     categoryLabel: "Full stack",
     stack: ["Next.js", "Express.js", "Supabase", "pgvector", "Redis", "BullMQ"],
-    links: [{ label: "GitHub", href: "https://github.com/hrxsrv" }],
+    links: [
+      { label: "Visit vithos.in", href: "https://www.vithos.in/" },
+      { label: "How it's hosted", href: "/projects/nas-deploy" },
+      { label: "GitHub", href: "https://github.com/hrxsrv" },
+    ],
+    cover: {
+      kind: "logo",
+      src: "/projects/vithos-logo.png",
+      alt: "Vithos logo",
+      background: "#f7f0e6",
+      ink: "#005c2f",
+    },
     highlights: [
       "RAG-based chat using pgvector for semantic retrieval over medical history.",
       "Async ingestion pipeline (BullMQ + Redis) with scalable workers for parsing and embeddings.",
       "Biomarker tracking and trend analytics with dashboards and health nudges.",
       "Secure storage and sharing via Supabase row-level security for tenant isolation.",
+      "Backend self-hosted on a spare Android phone with push-to-deploy (see nas-deploy).",
     ],
     caseStudy: {
       problem:
@@ -110,10 +141,53 @@ export const projects: Project[] = [
       ],
     },
   },
+  {
+    slug: "nas-deploy",
+    name: "nas-deploy",
+    tagline: "A spare phone as a backend host",
+    summary:
+      "Runs the Vithos API on a spare 2018 Android phone, with public HTTPS through Cloudflare Tunnel and a deploy on every push to main.",
+    category: "backend",
+    categoryLabel: "Backend",
+    stack: ["Node.js", "Cloudflare Tunnel", "GitHub Actions", "Termux", "Tailscale", "tmux", "Shell"],
+    links: [{ label: "Source on GitHub", href: "https://github.com/vithosapp/nas-deploy" }],
+    cover: {
+      kind: "art",
+      src: "/projects/nas-deploy.jpg",
+      alt: "The phone running Termux, with tmux sessions for the tunnel, the Vithos API and the deploy webhook",
+      background: "#010101",
+    },
+    highlights: [
+      "Public HTTPS through an outbound Cloudflare Tunnel, so it works behind CGNAT with no ports opened on the router.",
+      "Push-to-deploy: GitHub Actions calls an authenticated webhook that pulls, installs, builds and restarts the API, and gets the real exit status and output back.",
+      "Builds before restarting, so a failed install or build leaves the running version untouched.",
+      "Survives reboots: Termux:Boot takes a wake lock and recreates the tmux sessions for the API, tunnel and webhook.",
+      "Authenticated /stats endpoint reports battery, storage, memory and load from the phone; SSH is reachable only over Tailscale.",
+    ],
+    caseStudy: {
+      problem:
+        "Vithos needed an always-on backend, but a VPS is a monthly bill for a side project. A spare Android phone draws little power and has a built-in battery as backup, but it sits behind a home router, often on CGNAT, and Android keeps trying to stop background apps.",
+      approach: [
+        "The API runs in Termux on the phone. Cloudflare Tunnel keeps an outbound connection to Cloudflare's edge and forwards a public hostname to localhost, so no inbound ports are needed.",
+        "Every push to main triggers GitHub Actions, which POSTs to a small Node.js webhook guarded by a shared secret compared in constant time. The webhook runs the deploy script and returns its exit status and output, so a failed deploy fails the CI job.",
+        "The deploy script stops on the first error and builds before restarting, so a broken build never replaces the running API. tmux keeps the API, tunnel and webhook alive, and Termux:Boot recreates them after a reboot.",
+        "The first listener was the adnanh/webhook Go binary, which crashed with SIGSYS on Android: the Go runtime's process-spawning path hit Android's syscall restrictions. It was replaced with a dependency-free Node.js server that lives in the repo.",
+      ],
+      architecture: [
+        { step: "Push", detail: "A push to main starts a GitHub Actions job" },
+        { step: "Webhook", detail: "Authenticated POST /deploy through the tunnel" },
+        { step: "Deploy", detail: "git pull, pnpm install, pnpm build, then restart" },
+        { step: "Serve", detail: "API on the phone, public via Cloudflare Tunnel" },
+        { step: "Operate", detail: "SSH over Tailscale, /stats telemetry, UptimeRobot" },
+      ],
+    },
+  },
 ];
 
 export type Job = {
   company: string;
+  now?: string; // current name, if the company has since been renamed
+  logo?: string; // small square image in /public; initials are shown without one
   location: string;
   roles: { title: string; dates: string; points: string[] }[];
 };
@@ -121,6 +195,7 @@ export type Job = {
 export const experience: Job[] = [
   {
     company: "Rimo LLC",
+    logo: "/logos/rimo.png",
     location: "Tokyo, Japan",
     roles: [
       { title: "Software Development Engineer (L3)", dates: "Oct 2026 — Present", points: [] },
@@ -138,6 +213,8 @@ export const experience: Job[] = [
   },
   {
     company: "Connexlab",
+    now: "Keogram Labs",
+    logo: "/logos/keogram.png",
     location: "Remote",
     roles: [
       {
@@ -153,9 +230,33 @@ export const experience: Job[] = [
   },
 ];
 
-export const hackathons = [
-  { title: "Convolve 4.0", result: "All India Rank 2", detail: "Out of 10,000+ participants" },
-  { title: "Rimo Hack, Tokyo", result: "Winner", detail: "Internal company hackathon" },
+// `photo.position` is the CSS object-position used when the photo is cropped to the card's 16:10 frame.
+export const hackathons: {
+  title: string;
+  result: string;
+  detail: string;
+  photo?: { src: string; alt: string; position?: string };
+}[] = [
+  {
+    title: "Convolve 4.0",
+    result: "All India Rank 2",
+    detail: "Out of 10,000+ participants",
+    photo: {
+      src: "/hackathons/convolve-4.jpg",
+      alt: "Receiving the first runner-up trophy on stage at Convolve 4.0, IIT Guwahati",
+      position: "50% 30%",
+    },
+  },
+  {
+    title: "Rimo Hack, Tokyo",
+    result: "Winner",
+    detail: "Internal company hackathon",
+    photo: {
+      src: "/hackathons/rimo-hack.jpg",
+      alt: "Group photo at Rimo's Tokyo office after winning Rimo Hack",
+      position: "15% 50%",
+    },
+  },
 ];
 
 export const achievements = [

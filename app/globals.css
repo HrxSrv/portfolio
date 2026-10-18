@@ -14,6 +14,7 @@
   --accent: #0060df;
   --accent-hover: #004bb0;
   --success: #1a7f37;
+  --danger: #cf222e;
   --invert-bg: #171717;
   --invert-fg: #ffffff;
 }
@@ -30,6 +31,7 @@
   --accent: #52a8ff;
   --accent-hover: #8cc6ff;
   --success: #3fb950;
+  --danger: #ff7b72;
   --invert-bg: #ededed;
   --invert-fg: #0a0a0a;
 }
@@ -46,6 +48,7 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-success: var(--success);
+  --color-danger: var(--danger);
   --color-invert: var(--invert-bg);
   --color-invert-fg: var(--invert-fg);
   --font-sans: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
@@ -61,6 +64,13 @@ body {
   background: var(--bg);
   color: var(--fg);
   -webkit-font-smoothing: antialiased;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 ::selection {

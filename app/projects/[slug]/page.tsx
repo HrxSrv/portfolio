@@ -50,11 +50,18 @@ export default async function ProjectPage({ params }: Props) {
         <div className="flex flex-col gap-1.5 py-6 pr-6">
           <span className="font-mono text-xs text-fg-3">LINKS</span>
           <div className="flex flex-wrap gap-x-4">
-            {p.links.map((l) => (
-              <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1 text-[15px] font-medium text-accent hover:text-accent-hover">
-                {l.label} <ArrowUpRight size={14} />
-              </a>
-            ))}
+            {p.links.map((l) => {
+              const cls = "inline-flex min-h-11 items-center gap-1 text-[15px] font-medium text-accent hover:text-accent-hover";
+              return l.href.startsWith("/") ? (
+                <Link key={l.href} href={l.href} className={cls}>
+                  {l.label} <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className={cls}>
+                  {l.label} <ArrowUpRight size={14} />
+                </a>
+              );
+            })}
           </div>
         </div>
         <div className="flex flex-col gap-2 py-6">

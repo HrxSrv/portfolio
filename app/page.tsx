@@ -1,8 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
-import { achievements, education, experience, hackathons, posts, projects, site } from "@/content/site";
+import { achievements, education, experience, hackathons, posts, projects, site, type Job } from "@/content/site";
 import { ProjectGrid } from "@/components/project-grid";
 import { Button, Container, SectionHeading } from "@/components/ui";
-import { ArrowDown, ArrowUpRight, Github, Linkedin, Trophy } from "@/components/icons";
+import { ArrowDown, ArrowUpRight, Download, Github, Linkedin, Trophy } from "@/components/icons";
+import { RESUME_FILENAME } from "@/lib/resumes";
 
 export default function Home() {
   return (
@@ -22,15 +24,12 @@ export default function Home() {
             <Button href="/#work">
               See my work <ArrowDown />
             </Button>
-            {site.resume ? (
-              <Button href={site.resume} variant="secondary" external>
-                Résumé (PDF)
-              </Button>
-            ) : (
-              <Button href="/about" variant="secondary">
-                About me
-              </Button>
-            )}
+            <Button href="/resume.pdf" variant="secondary" external>
+              View résumé <ArrowUpRight />
+            </Button>
+            <a href="/resume.pdf" download={RESUME_FILENAME} aria-label="Download résumé" title="Download résumé" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line hover:border-line-strong">
+              <Download />
+            </a>
             <a href={site.github} aria-label="GitHub" target="_blank" rel="noreferrer" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line hover:border-line-strong">
               <Github />
             </a>
@@ -58,11 +57,17 @@ export default function Home() {
           <div className="min-w-0 flex-[999_1_560px] border-t border-line">
             {experience.map((job) => (
               <div key={job.company} className="border-b border-line py-6">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-[17px] font-semibold">{job.company}</span>
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                  <div className="flex items-center gap-3">
+                    <CompanyLogo job={job} />
+                    <span className="text-[17px] font-semibold">
+                      {job.company}
+                      {job.now && <span className="font-normal text-fg-3"> (now {job.now})</span>}
+                    </span>
+                  </div>
                   <span className="font-mono text-[13px] text-fg-3">{job.location}</span>
                 </div>
-                <div className="mt-3 flex flex-col gap-5">
+                <div className="mt-4 flex flex-col gap-5 sm:pl-11">
                   {job.roles.map((r) => (
                     <div key={r.title} className="flex flex-col gap-2">
                       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
@@ -91,14 +96,30 @@ export default function Home() {
           <SectionHeading index="03" label="Hackathons & achievements" title="Competitions" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {hackathons.map((h) => (
-              <div key={h.title} className="flex flex-col gap-4 rounded-xl border border-line p-7">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-fg">
-                  <Trophy />
-                </span>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[28px] font-semibold tracking-[-0.03em]">{h.result}</span>
-                  <span className="text-[17px] font-medium">{h.title}</span>
-                  <span className="text-sm text-fg-2">{h.detail}</span>
+              <div key={h.title} className="flex flex-col overflow-hidden rounded-xl border border-line">
+                {h.photo && (
+                  <div className="relative aspect-[16/10] border-b border-line bg-surface-2">
+                    <Image
+                      src={h.photo.src}
+                      alt={h.photo.alt}
+                      fill
+                      sizes="(min-width: 1120px) 528px, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover"
+                      style={{ objectPosition: h.photo.position }}
+                    />
+                  </div>
+                )}
+                <div className="flex flex-col gap-4 p-7">
+                  {!h.photo && (
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-fg">
+                      <Trophy />
+                    </span>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[28px] font-semibold tracking-[-0.03em]">{h.result}</span>
+                    <span className="text-[17px] font-medium">{h.title}</span>
+                    <span className="text-sm text-fg-2">{h.detail}</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -180,5 +201,28 @@ export default function Home() {
         </section>
       </Container>
     </>
+  );
+}
+
+// Small square company mark; falls back to the company's initials when no logo file is set.
+function CompanyLogo({ job }: { job: Job }) {
+  const box = "relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line";
+  if (job.logo) {
+    return (
+      <span className={box}>
+        <Image src={job.logo} alt="" fill sizes="32px" className="object-cover" />
+      </span>
+    );
+  }
+  const initials = job.company
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  return (
+    <span aria-hidden className={`${box} bg-surface-2 font-mono text-[11px] font-medium text-fg-2`}>
+      {initials}
+    </span>
   );
 }

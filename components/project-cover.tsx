@@ -1,13 +1,40 @@
+import Image from "next/image";
 import type { Project } from "@/content/site";
 
-// A typographic cover built from the project's own architecture, used until real screenshots exist.
+// Shows the project's cover image if it has one, otherwise a typographic cover built from its architecture.
 export function ProjectCover({ project, large = false }: { project: Project; large?: boolean }) {
+  const frame = `relative overflow-hidden rounded-xl border border-line ${large ? "aspect-[16/8]" : "aspect-[16/10]"}`;
+  const sizes = large ? "(min-width: 1120px) 1072px, 100vw" : "(min-width: 1120px) 524px, (min-width: 768px) 50vw, 100vw";
+  const cover = project.cover;
+
+  if (cover?.kind === "art") {
+    return (
+      <div className={frame} style={{ background: cover.background }}>
+        <Image src={cover.src} alt={cover.alt} fill sizes={sizes} className="object-contain" priority={large} />
+      </div>
+    );
+  }
+
+  if (cover?.kind === "logo") {
+    return (
+      <div className={`${frame} flex items-center justify-center gap-[4%]`} style={{ background: cover.background }}>
+        <div className="relative aspect-square h-[38%]">
+          <Image src={cover.src} alt={cover.alt} fill sizes={large ? "256px" : "160px"} className="object-contain" priority={large} />
+        </div>
+        <span
+          className={`font-semibold tracking-[-0.04em] ${large ? "text-6xl sm:text-8xl" : "text-5xl"}`}
+          style={{ color: cover.ink }}
+        >
+          {project.name}
+        </span>
+      </div>
+    );
+  }
+
   const steps = project.caseStudy?.architecture ?? [];
   return (
     <div
-      className={`relative flex flex-col justify-between overflow-hidden rounded-xl border border-line bg-surface ${
-        large ? "aspect-[16/8] p-6 sm:p-10" : "aspect-[16/10] p-5"
-      }`}
+      className={`${frame} flex flex-col justify-between bg-surface ${large ? "p-6 sm:p-10" : "p-5"}`}
       style={{
         backgroundImage: "radial-gradient(var(--border) 1px, transparent 1px)",
         backgroundSize: "16px 16px",
